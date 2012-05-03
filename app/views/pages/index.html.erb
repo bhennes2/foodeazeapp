@@ -1,0 +1,7 @@
+<h1>FoodEaze</h1>
+<p><em>Delicious food meets hungry person</em></p>
+
+<% if !current_restaurant %>
+	<p>Sign in with</p>
+	<%= link_to "Twitter", "/auth/twitter" %>
+<% end %>

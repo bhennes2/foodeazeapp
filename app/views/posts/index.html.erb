@@ -1,0 +1,22 @@
+<h1>Our posts (<%= @post_count %>)</h1>
+
+<%= link_to "New post", new_post_url %>
+<p>Food (<%= @food_specials.count %>)</p>
+<ul>
+	<% @food_specials.each do |special| %>
+		<li><%= link_to "#{special.content}" %> 
+			| <%= link_to 'Delete', post_url(special.post.id), :method => :delete, :confirm => 'Are you sure?'%>
+			| <%= link_to 'Edit', edit_post_url(special.post.id) %></li>
+	<% end %>
+</ul>
+<p>Drink (<%= @drink_specials.count %>)</p>
+<ul>
+	<% @drink_specials.each do |special| %>
+		<li><%= link_to "#{special.content}" %> 
+			| <%= link_to 'Delete', post_url(special.post.id), :method => :delete, :confirm => 'Are you sure?'%>
+			| <%= link_to 'Edit', edit_post_url(special.post.id) %></li>
+	<% end %>
+</ul>
+<!-- <p>Poplular</p>
+<p>Deals</p>
+<p>Miscellaneous</p> -->

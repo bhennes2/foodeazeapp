@@ -1,0 +1,20 @@
+<h1>Here is the Layout for <%= current_restaurant.name %></h1>
+
+<%= form_for(@table_type) do |f| %>
+	<%= f.label 'Table size: '%>
+	<%= f.select :size, (1..15).to_a %>
+	<%= f.label 'Quantity: '%>
+	<%= f.select :quantity, (1..20).to_a %>
+	<%= f.label 'Turnover (min/table): '%>
+	<%= f.select :turnover, (15..90).to_a %>
+	<%= f.hidden_field :layout_id, :value => @layout.id %>
+	<%= f.submit "Add to the layout" %>
+<% end %>
+
+<ul>
+	<% @table_types.each do |table| %>
+		<li><%= table.size %>-top | Qty: <%= table.quantity %> | Turnover: <%= table.turnover %> 
+			| <%= link_to 'Delete', table_type_path(table.id),:method => :delete, :confirm => 'Are you sure?' %>
+		</li>
+	<% end %>
+</ul>

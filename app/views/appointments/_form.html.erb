@@ -1,0 +1,51 @@
+<%= form_for(@appointment) do |f| %>
+	Name: <%= f.text_field :name, :placeholder => "Enter a name" %>
+	Party: <%= f.select :party, (1..15).to_a  %>
+	Phone: <%= f.text_field :phone, :autocomplete => 'off', :placeholder => 'Enter a phone #' %>
+	Wait time (mins): <%= f.select :wait, (10..90).to_a %>
+	<%= f.hidden_field :restaurant_id, :value => current_restaurant.id %>
+	<%= f.hidden_field :seated, :value => false %>
+	<%= f.hidden_field :customer_id %>
+	<%= f.submit "Book it", :id => 'submit_button' %>
+<% end %>
+
+<script>
+	//$("#appointment_phone").mask("(999) 999-9999");
+	
+	var availablePhoneNumbers = [
+				<% @customers.each do |customer| %>
+					"<%= customer.phone %>"
+					<% if customer != @customers.last %>,<% end %>
+				<% end %>
+			];
+	var availableNames = [	<% @customers.each do |customer| %>
+					{ "id" : "<%= customer.id %>",
+					  "name" : "<%= customer.name %>",
+					  "phone" : "<%= customer.phone %>"
+					}
+				<% if customer != @customers.last %>,<% end %>
+			<% end %>
+	];
+
+	$("#appointment_phone").autocomplete({
+				source: availablePhoneNumbers,
+				select: function(event, ui){
+					for(var i=0; i < availableNames.length; i++){
+						if (availableNames[i]["phone"] == ui.item.value){
+							$('#appointment_name').val(availableNames[i]["name"]);
+							$('#appointment_customer_id').val(availableNames[i]["id"]);
+						}
+					}
+				}
+	});
+	
+	$('#submit_button').click(function(){
+		var value = $('#appointment_phone').val();
+		value = value.replace('(', '');
+		value = value.replace(')', '');
+		value = value.replace(' ', '');
+		value = value.replace('-', '');
+		$('#appointment_phone').val(value);
+		return true;
+	});
+</script>

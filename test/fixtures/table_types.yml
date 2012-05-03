@@ -1,0 +1,13 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  layout_id: 1
+  size: 1
+  quantity: 1
+  turnover: 1.5
+
+two:
+  layout_id: 1
+  size: 1
+  quantity: 1
+  turnover: 1.5

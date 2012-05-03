@@ -1,0 +1,8 @@
+<%= form_tag posts_path, :method => 'POST' do %>
+	<%= label_tag 'Subject :'%>
+	<%= select_tag :subject, options_for_select(["food", "drink", "popular", "deals"])%><br />
+	<%= label_tag 'Content :'%>
+	<%= text_area_tag :content, nil, :rows => 20, :cols => 120 %>
+	<%= hidden_field_tag :restaurant_id, current_restaurant.id %><br />
+	<%= submit_tag 'Post!'%>
+<% end %>

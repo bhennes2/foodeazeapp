@@ -1,0 +1,92 @@
+<h1>Metrics</h1><br />
+
+<p>Average waiting time: <input type="text" id="waiting_time"></p>
+<p>Party size: <%= select_tag "party", options_for_select((@parties).push("All"), "All") %></p>
+<p>Average party size: <input type="text" id="party_size"></p>
+<!-- <p>Basis:  select_tag "party", options_for_select([["daily", 1], ["weekly", 7], ["monthly", 30], ["yearly", 365]], "daily") </p> -->
+<p>Busiest time slot <input type="text" id="busy_time"></p>
+<p>Time increment: <%= select_tag "increment", options_for_select([["15 minutes", 15], ["half hour", 30], ["hour", 60], ["day", 60*24], ["week", 60*7*24], ["month", 60*24*30], ["year", 60*24*365]], "hour") %></p>
+<p>Appointment: Fulfill %: <input type="text" id="fulfill"></p>
+<p>Appointment: On-time %: <input type="text" id="on_time"></p>
+<img src="http://www.mathworks.com/help/techdoc/ref/bar_set_xy.png" />
+
+<script>
+
+	var Metrics = {
+		
+		waiting : function(appts){
+			//Calculate waiting time for specific party size
+			var party_size = $('#party').val();
+			var total_time = 0;
+			var total_count = 0;
+			
+			if (party_size == "All"){
+				for(var i=0; i < appts.length; i++){
+					total_time += parseInt(appts[i]['wait']);
+					total_count += 1;
+				}
+			}
+			else {
+				for(var i=0; i < appts.length; i++){
+					if (appts[i]['party'] == party_size){
+						total_time += parseInt(appts[i]['wait']);
+						total_count += 1;
+					}
+				}
+			}
+			$('#waiting_time').val(total_time/total_count);
+		},
+		
+		party_size : function(appts){
+			//Calculate average party size
+			var total_party = 0;
+			for(var i=0; i < appts.length; i++){ total_party += parseInt(appts[i]['party']); }
+			$('#party_size').val(total_party/appts.length);
+		},
+		
+		busy_time : function(appt){
+			//Calculate busiest period
+			
+		},
+		
+		on_time : function(apps){
+			
+			
+		},
+		fulfill : function(appts){
+			//Calculate % fill
+			var total_filled = 0;
+			for(var i=0; i < appts.length; i++){ 
+				if (appts[i]['seated'] == "true"){
+					total_filled += 1; 
+				}
+			}
+			$('#fulfill').val(total_filled/appts.length*100);
+		}
+	};
+
+
+	$(document).ready(function(){
+	var appts = [
+		<% @appointments.each do |appt| %>
+			{	
+				"name" : "<%= appt.name %>",
+				"party" : "<%= appt.party %>",
+				"wait" : "<%= appt.wait %>",
+				"seated" : "<%= appt.seated %>",
+				"created_at" : "<%= appt.updated_at %>"
+			}
+			<% if appt != @appointments.last %>,<% end %>
+		<% end %>
+		];
+		
+		Metrics.waiting(appts);
+		Metrics.party_size(appts);
+		Metrics.fulfill(appts);
+		
+		$('#party').bind('change', function(){
+			Metrics.waiting(appts);
+		});
+	});
+
+</script>

@@ -1,0 +1,154 @@
+<h1>Appointments for today: <%= Time.now.strftime("%B #{Time.now.day.ordinalize}, %Y") %>&nbsp;&nbsp;<span id="clock"></span></h1>
+<%= render :partial => 'form' %>
+<div id="alerts"><p id="alerts_header">Alerts:</p></div>
+<%= form_tag appointments_path, :method => :get, :id => "search_form" do %>
+	<%= hidden_field_tag :direction, params[:direction] %>
+	<%= hidden_field_tag :sort, params[:sort] %>
+  <p>
+    <%= text_field_tag :search, params[:search], :autocomplete => "off", :placeholder => "Search by name..." %>
+    <%= submit_tag "Search", :name => nil %>
+  </p>
+<% end %>
+
+<h3>Wait queue</h3>
+<% party_size = 0 %>
+<% @appointments_sorted.each_cons(2) do |appt, next_appt| %>
+	<% if party_size != appt.party %>
+		<% party_size = appt.party %>
+		<ol>Party: <strong><%= appt.party %></strong> | Avg. wait: <%= party_wait_time(appt.party)%> | Est. wait: TBD!!!!!!
+	<% end %>
+			<li><%= appt.name %> | <%= pluralize(appt.wait, 'minute') %> | <% button_to 'Delete', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %>
+				| <% button_to 'Seat this party', "/seat?id=#{appt.id}" %>
+				</li>
+	<% if appt.party != next_appt.party %>
+		</ol>
+	<% end %>
+<% end %>
+
+<h3>What's available</h3>
+<% @table_types.each do |table| %>
+	<ol><%= table.size%>-top | Wait: <%= pluralize(table.turnover, 'minute') %>
+		
+		<% @people_eating.each do |people| %>
+			<% if people[:party] == table.size %>
+				<% @size = people[:appointments].length %>
+				<% people[:appointments].each do |appt| %>
+					<li><%= appt.name %> | <%= dining_time_left(appt.updated_at, table.turnover) %></li>
+				<% end %>
+			<% end %>
+			<% @size ||= 0 %>	
+		<% end %>
+		
+		<% (table.quantity - @size).times do %>
+			<li></li>
+		<% end %>
+	</ol>
+<% end %>
+
+<div id="results"><%= render :partial => 'results' %></div>
+
+<script>
+	$(document).ready(function(){
+		
+		$('#results th a').live('click', function () {
+		    $.getScript(this.href);
+		    return false;
+		});
+		
+		$('#search').keyup(function(){
+			$.get($('#search_form').attr('action'), { search: $('#search').val() }, null, 'script');
+			return false;
+		});
+		
+		var wait = $('#wait18').html();
+		wait = parseInt(wait);
+		countdown();
+		function countdown(){
+			if (wait > 15){
+				wait = parseInt($('#wait18').html());
+				$('#wait18').html(wait);
+				wait -= 1;
+				setTimeout(countdown, 60000);
+			}
+			else if (wait == 15){
+				wait = "14:59";
+				$('#wait18').html(wait);
+				setTimeout(countdown, 1000);
+			}
+			else {
+				wait = $('#wait18').html();
+				var time_array = wait.split(':');
+				time_array[0] = parseInt(time_array[0]);
+				if (isNaN(time_array[1])){
+					time_array[1] = 0;
+				}
+				else {
+					if (time_array[1].substr(0,1) == "0"){
+						time_array[1] = parseInt(time_array[1].substr(1,1));
+					}
+					else {
+						time_array[1] = parseInt(time_array[1]);
+					}
+				}
+				if (time_array[0] == 0 && time_array[1] == 0){
+					$('#alerts_header').append("<p>" + new Date() + "Party 12 is ready!</p>");
+					return false;
+				}
+				else if (time_array[1] == 0){
+					time_array[0] -= 1;
+					time_array[1] = 59;
+					var val = time_array[0] + ':' + time_array[1];
+					$('#wait18').html(val);
+					setTimeout(countdown, 1000);
+				}
+				else {
+					time_array[1] -= 1;
+					if (time_array[1] < 10){
+						time_array[1] = "0"+time_array[1];
+					}
+					var val = time_array[0] + ':' + time_array[1];
+					$('#wait18').html(val);
+					if (time_array[0] == 0 && time_array[1] == 0){
+						$('#alerts_header').append("<p>" + new Date() + "Party 12 is ready!</p>");
+						return false;
+					}
+					else {
+						setTimeout(countdown, 1000);
+					}
+				}			
+			}		
+		};
+		
+		update_clock();
+		function update_clock(){
+			var currentTime = new Date ( );
+			
+			var currentHours = currentTime.getHours ( );
+			var currentMinutes = currentTime.getMinutes ( );
+			var currentSeconds = currentTime.getSeconds ( );
+
+			  	// Pad the minutes and seconds with leading zeros, if required
+			  currentMinutes = ( currentMinutes < 10 ? "0" : "" ) + currentMinutes;
+			  currentSeconds = ( currentSeconds < 10 ? "0" : "" ) + currentSeconds;
+
+			  // Choose either "AM" or "PM" as appropriate
+			  var timeOfDay = ( currentHours < 12 ) ? "AM" : "PM";
+
+			  // Convert the hours component to 12-hour format if needed
+			  currentHours = ( currentHours > 12 ) ? currentHours - 12 : currentHours;
+
+			  // Convert an hours component of "0" to "12"
+			  currentHours = ( currentHours == 0 ) ? 12 : currentHours;
+
+			  // Compose the string for display
+			  var currentTimeString = currentHours + ":" + currentMinutes + ":" + currentSeconds + " " + timeOfDay;
+
+			  // Update the time display
+			  $('#clock').html(currentTimeString);
+			setTimeout(update_clock, 1000);
+		};
+		
+		
+	});
+
+</script>
