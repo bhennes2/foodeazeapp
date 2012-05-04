@@ -83,4 +83,40 @@ module AppointmentsHelper
     diff
   end
   
+  def estimated_wait_time(party_size)
+    total_available = current_restaurant.layout.table_types.where(:size => party_size).first.quantity
+    people_eating = current_restaurant.appointments.party_eating_sorted(party_size)
+
+    if people_eating.count < total_available
+      # If no one is waiting
+      return 0
+    elsif people_eating.count == total_available
+      # People are now waiting
+      
+      turnover = current_restaurant.layout.table_types.where(:size => party_size).first.turnover
+      people_eating_time_remaining = Array.new
+      people_eating.each do |people|
+        people_eating_time_remaining << dining_time_left(people.seated_at, turnover)
+      end
+
+      people_waiting = current_restaurant.appointments.party_waiting_sorted(party_size)
+              
+      if people_eating.length >= people_waiting.length
+        # If waiting & # wait line is less than # of people_eating 
+        wait_time = 0
+        people_waiting.each_index do |i| 
+          wait_time += people_eating_time_remaining[i]
+        end
+      
+        return wait_time
+      elsif people_eating.length < people_waiting.length
+        # If waiting & # wait line is greater than # of people_eating 
+        diff = people_waiting.length - people_eating.length
+        wait_time = people_eating_time_remaining.inject(:+)
+        wait_time += diff * turnover
+        return wait_time
+      end
+    end
+  end
+  
 end

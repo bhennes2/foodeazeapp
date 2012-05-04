@@ -6,14 +6,14 @@ class AppointmentsController < ApplicationController
     @title = "Today's queue"
     @appointment = Appointment.new
     #@appointments = current_restaurant.appointments.today_queue.order(params[:sort])
-    @appointments = Appointment.search(params[:search]).order(sort_column + " " + sort_direction)
-    @appointments_sorted = Appointment.order(:party)
+    @appointments = current_restaurant.appointments.search(params[:search]).order(sort_column + " " + sort_direction)
+    @appointments_sorted = current_restaurant.appointments.order(:party)
     @customers = Customer.all
     @avg_wait_time = avg_wait_time(@appointments)
     
     @table_types = current_restaurant.layout.table_types
-    @party_sizes_eating = Appointment.party_eating
-    @people_eating = organize_by_party_size(Appointment.eating, @party_sizes_eating)
+    @party_sizes_eating = current_restaurant.appointments.party_eating
+    @people_eating = organize_by_party_size(current_restaurant.appointments.eating, @party_sizes_eating)
     
     respond_to do |format|
       format.html
@@ -80,7 +80,30 @@ class AppointmentsController < ApplicationController
     if @appointment.open_table?
       @appointment.update_attributes(:seated => true, :seated_at => Time.now)
     end
-      redirect_to :action => 'index'
+    redirect_to :action => 'index'
+  end
+  
+  def book_and_seat
+    appt = Appointment.new
+    appt.name = params[:name]
+    appt.party = params[:party]
+    appt.wait = 0
+    appt.restaurant_id = current_restaurant.id
+    appt.seated = true
+    appt.seated_at = Time.now
+    appt.phone = params[:phone]
+    
+    if check_phone_in_db(params[:phone])
+      appt.customer_id = Customer.where(:phone => params[:phone]).first.id
+    else
+      #Create new customer
+      customer = Customer.create(:name => params[:name], :phone => params[:phone])
+      appt.customer_id = customer.id
+    end
+    appt.save
+    
+    #send a text for special deals w/ no wait
+    
   end
 
   private

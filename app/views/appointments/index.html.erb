@@ -1,5 +1,6 @@
 <h1>Appointments for today: <%= Time.now.strftime("%B #{Time.now.day.ordinalize}, %Y") %>&nbsp;&nbsp;<span id="clock"></span></h1>
 <%= render :partial => 'form' %>
+<%= button_tag 'Book & seat now!', :id => "book_and_seat" %>
 <div id="alerts"><p id="alerts_header">Alerts:</p></div>
 <%= form_tag appointments_path, :method => :get, :id => "search_form" do %>
 	<%= hidden_field_tag :direction, params[:direction] %>
@@ -15,7 +16,7 @@
 <% @appointments_sorted.each_cons(2) do |appt, next_appt| %>
 	<% if party_size != appt.party %>
 		<% party_size = appt.party %>
-		<ol>Party: <strong><%= appt.party %></strong> | Avg. wait: <%= party_wait_time(appt.party)%> | Est. wait: TBD!!!!!!
+		<ol>Party: <strong><%= appt.party %></strong> | Avg. wait: <%= party_wait_time(appt.party)%>
 	<% end %>
 			<li><%= appt.name %> | <%= pluralize(appt.wait, 'minute') %> | <% button_to 'Delete', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %>
 				| <% button_to 'Seat this party', "/seat?id=#{appt.id}" %>
@@ -27,8 +28,7 @@
 
 <h3>What's available</h3>
 <% @table_types.each do |table| %>
-	<ol><%= table.size%>-top | Wait: <%= pluralize(table.turnover, 'minute') %>
-		
+	<ol><%= table.size%>-top | Wait: <%= pluralize(estimated_wait_time(table.size), 'minute') %>
 		<% @people_eating.each do |people| %>
 			<% if people[:party] == table.size %>
 				<% @size = people[:appointments].length %>
@@ -49,6 +49,11 @@
 
 <script>
 	$(document).ready(function(){
+		
+		$('#book_and_seat').bind('click', function(){
+			$.post("/book-and-seat", { name: $('#appointment_name').val(), party: $('#appointment_party :selected').text(), phone: $('#appointment_phone').val() }, null, 'script');
+			return false;
+		});
 		
 		$('#results th a').live('click', function () {
 		    $.getScript(this.href);

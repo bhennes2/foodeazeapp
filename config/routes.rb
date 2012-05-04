@@ -16,6 +16,8 @@ FoodEazeApp::Application.routes.draw do
   
   resources :posts
   
+  post "/book-and-seat" => 'appointments#book_and_seat', :as => :book_and_seat
+  
   match "/auth/:provider/callback" => "sessions#create"
   match "/signout" => "sessions#destroy", :as => :signout
   

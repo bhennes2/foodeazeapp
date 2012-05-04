@@ -14,6 +14,9 @@ class Appointment < ActiveRecord::Base
   scope :unique_parties, order(:party).select(:party).uniq
   
   scope :eating, where(:seated => true, :done => nil).order(:party)
+  scope :party_eating_sorted, lambda { |size| where(:seated => true, :done => nil, :party => size).order("seated_at ASC") }
+  scope :party_waiting_sorted, lambda { |size| where(:seated => false, :done => nil, :party => size).order("created_at ASC") }
+  
   scope :party_eating, where(:seated => true, :done => nil).select(:party).uniq
   scope :number_eating_for_party, lambda { |size| where(:seated => true, :done => nil, :party => size).order(:party) }
 
