@@ -20,12 +20,22 @@
 	  	<td><%= appt.id %></td>
 	    <td><%= appt.name %></td>
 		<td><%= appt.party %></td>
-	    <td id="wait<%= appt.id %>"><%= wait_time_left(appt.created_at, appt.wait) %></td>
-		<td><%= link_to "#{appt.phone}", "/text-message?phone=#{appt.phone}&id=#{appt.id}", :confirm => "SMS customer?" %></td>
+	    <td id="wait_count-<%= appt.id %>"><%= wait_time_left(appt.created_at, appt.wait) %></td>
+		<td>
+			<% if appt.phone.present? %>
+				<%= button_to "#{appt.phone}", "/text-message?phone=#{appt.phone}&id=#{appt.id}", :confirm => "SMS customer?" %>
+			<% end %>
+		</td>
 		<td id="start<%= appt.id %>"><%= appt.created_at.strftime('%l:%M %p') %></td>
 	    <td><%= appt.seated %></td>
 		<td><%= button_to 'Delete', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %></td>
-		<td><%= button_to 'Seat this party', "/seat?id=#{appt.id}" %></td>
+		<% if appt.location.present? %>
+			<% if appt.location == 'outdoor'%>
+				<td><%= button_to 'Seat Outside', "/seat/#{appt.id}?location=outside" %></td>
+			<% elsif appt.location == 'indoor' %>
+				<td><%= button_to 'Seat Inside', "/seat/#{appt.id}?location=inside" %></td>
+			<% end %>
+		<% end %>
 	</tr>
 <% end %>
 </table>

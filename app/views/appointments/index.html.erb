@@ -65,24 +65,60 @@
 			return false;
 		});
 		
-		var wait = $('#wait18').html();
-		wait = parseInt(wait);
-		countdown();
-		function countdown(){
-			if (wait > 15){
-				wait = parseInt($('#wait18').html());
-				$('#wait18').html(wait);
-				wait -= 1;
-				setTimeout(countdown, 60000);
+		// var wait_a = $('td[id|="wait_count"]');
+		// 		var wait_object = [];
+		// 		for(var i=0; i < wait_a.length; i++){
+		// 				var wait = { "id" : "", "wait": ""};
+		// 				wait["id"] = wait_a[i].id;
+		// 				wait["wait"] = wait_a[i].innerHTML;
+		// 				console.log(wait["wait"]);
+		// 				wait_object.push(wait);
+		// 		}
+		
+		var wait_object = [	<% @appointments.each do |appt| %>
+								{ "id" : "wait_count-<%= appt.id %>",
+								  "wait" : "<%= wait_time_left(appt.created_at, appt.wait) %>",
+									"name" : "<%= appt.name %>"
+								}
+							<% if appt != @appointments.last %>,<% end %>
+						<% end %>
+		];
+		
+		change_timers();
+		show_alerts();
+		
+		function show_alerts(){
+			for(var i=0; i < wait_object.length; i++){	
+					if (wait_object[i]["wait"] == "0"){
+			 			$('#alerts_header').append("<p>" + new Date() + "Party " + wait_object[i]["name"] + " is ready!</p>");
+					}
 			}
-			else if (wait == 15){
-				wait = "14:59";
-				$('#wait18').html(wait);
-				setTimeout(countdown, 1000);
+		};
+		
+		function change_timers(){
+			for(var i=0; i < wait_object.length; i++){	
+					if (wait_object[i]["wait"] != "0"){
+			 			wait_object[i] = countdown(wait_object[i]);
+					}
 			}
-			else {
-				wait = $('#wait18').html();
-				var time_array = wait.split(':');
+			setTimeout(change_timers, 1000);
+		};
+		
+		function countdown(wait){
+			/*if (wait["wait"] > 15){
+				wait_new = parseInt($('#'+wait["id"]).html());
+				$('#'+wait["id"]).html(wait_new);
+				wait["wait"] -= 1;
+				return wait;
+			}
+			else if (wait["wait"] == 15){
+				wait["wait"] = "14:59";
+				$('#'+wait["id"]).html(wait["wait"]);
+				setTimeout(countdown(wait), 1000);
+			}*/
+			//else {
+				//wait["wait"] = $('#'+wait["id"]).html();
+				var time_array = wait["wait"].split(':');
 				time_array[0] = parseInt(time_array[0]);
 				if (isNaN(time_array[1])){
 					time_array[1] = 0;
@@ -96,15 +132,17 @@
 					}
 				}
 				if (time_array[0] == 0 && time_array[1] == 0){
-					$('#alerts_header').append("<p>" + new Date() + "Party 12 is ready!</p>");
-					return false;
+					$('#alerts_header').append("<p>" + new Date() + "Party " + wait['id'] + " is ready!</p>");
+					wait["wait"] = "0";
+					return wait;
 				}
 				else if (time_array[1] == 0){
 					time_array[0] -= 1;
 					time_array[1] = 59;
 					var val = time_array[0] + ':' + time_array[1];
-					$('#wait18').html(val);
-					setTimeout(countdown, 1000);
+					$('#'+wait["id"]).html(val);
+					wait["wait"] = val;
+					return wait;
 				}
 				else {
 					time_array[1] -= 1;
@@ -112,16 +150,16 @@
 						time_array[1] = "0"+time_array[1];
 					}
 					var val = time_array[0] + ':' + time_array[1];
-					$('#wait18').html(val);
+					$('#'+wait["id"]).html(val);
+					wait["wait"] = val;
 					if (time_array[0] == 0 && time_array[1] == 0){
-						$('#alerts_header').append("<p>" + new Date() + "Party 12 is ready!</p>");
-						return false;
+						$('#alerts_header').append("<p>" + new Date() + "Party " + wait['id'] + " is ready!</p>");
+						return wait;
 					}
 					else {
-						setTimeout(countdown, 1000);
+						return wait;
 					}
 				}			
-			}		
 		};
 		
 		update_clock();

@@ -2,6 +2,7 @@ class CustomersController < ApplicationController
   
   def index
     @title = "Welcome"
+    @customers = current_restaurant.customers
   end
   
   def show

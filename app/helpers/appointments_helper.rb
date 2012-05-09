@@ -19,14 +19,14 @@ module AppointmentsHelper
     return @client
   end
   
-  def wait_time_left(time, wait)
-    diff = Time.now.utc - time
-    diff = diff/60.to_i
-    diff = (wait - diff).ceil
-    if diff <= 0
+  def wait_time_left(created_at, wait)
+    diff = Time.now.utc - created_at
+    if (wait*60 - diff) <= 0
       return 0
     else
-      return diff
+      diff_minute = (wait*60-diff)/60.to_i
+      diff_second = (wait*60-diff)%60.to_i
+      return "#{diff_minute}:#{diff_second}"
     end
   end
   

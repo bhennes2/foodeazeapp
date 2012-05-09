@@ -1,4 +1,4 @@
 <%= link_to "FoodEaze", "/main" %> <img src="http://www.blogcdn.com/www.slashfood.com/media/2007/11/smittenkitchen_pumpkinwaffles.jpg" width="40">
 <% if current_restaurant %>
-	| Welcome <%= current_restaurant.name %> | <%= link_to 'Signout', '/signout' %>
+	| Welcome <%= current_restaurant.name %> | <%= link_to 'Signout', '/signout', :method => :post %>
 <% end %>

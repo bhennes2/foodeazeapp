@@ -7,13 +7,16 @@
 	<%= f.select :quantity, (1..20).to_a %>
 	<%= f.label 'Turnover (min/table): '%>
 	<%= f.select :turnover, (15..90).to_a %>
+	<%= f.label 'Location: '%>
+	<%= f.select :location, ["Indoor", "Outdoor"] %>
 	<%= f.hidden_field :layout_id, :value => @layout.id %>
-	<%= f.submit "Add to the layout" %>
+	<%= f.submit "Add" %>
 <% end %>
 
 <ul>
 	<% @table_types.each do |table| %>
-		<li><%= table.size %>-top | Qty: <%= table.quantity %> | Turnover: <%= table.turnover %> 
+		<li><%= table.size %>-top | Qty: <%= table.quantity %> | Turnover: <%= pluralize(table.turnover, 'minute') %> 
+			| Location: <%= table.location %>
 			| <%= link_to 'Delete', table_type_path(table.id),:method => :delete, :confirm => 'Are you sure?' %>
 		</li>
 	<% end %>

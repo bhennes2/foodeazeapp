@@ -5,4 +5,6 @@ class Food < ActiveRecord::Base
   
   #has_one :restaurant, :through => :post
   
+  validates :content, :presence => true
+  
 end

@@ -1,5 +1,7 @@
 class PagesController < ApplicationController
 
+  before_filter :signed_in, :only => [:main, :metrics]
+
   def index
     @title = "FoodEaze"
   end
@@ -11,7 +13,7 @@ class PagesController < ApplicationController
   
   def metrics
     @title = "Your metrics"
-    @appointments = current_restaurant.appointments
+    @appointments = current_restaurant.appointments.order("created_at ASC")
     @parties = party_sizes(@appointments)
   end
   

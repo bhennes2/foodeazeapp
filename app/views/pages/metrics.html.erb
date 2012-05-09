@@ -4,11 +4,12 @@
 <p>Party size: <%= select_tag "party", options_for_select((@parties).push("All"), "All") %></p>
 <p>Average party size: <input type="text" id="party_size"></p>
 <!-- <p>Basis:  select_tag "party", options_for_select([["daily", 1], ["weekly", 7], ["monthly", 30], ["yearly", 365]], "daily") </p> -->
-<p>Busiest time slot <input type="text" id="busy_time"></p>
+<p>Busiest time slot (hour of day) <input type="text" id="busy_time"></p>
 <p>Time increment: <%= select_tag "increment", options_for_select([["15 minutes", 15], ["half hour", 30], ["hour", 60], ["day", 60*24], ["week", 60*7*24], ["month", 60*24*30], ["year", 60*24*365]], "hour") %></p>
 <p>Appointment: Fulfill %: <input type="text" id="fulfill"></p>
 <p>Appointment: On-time %: <input type="text" id="on_time"></p>
-<img src="http://www.mathworks.com/help/techdoc/ref/bar_set_xy.png" />
+
+<div id="chartdiv" style="height:400px;width:300px; "></div>
 
 <script>
 
@@ -44,14 +45,29 @@
 			$('#party_size').val(total_party/appts.length);
 		},
 		
-		busy_time : function(appt){
+		busy_time : function(appts){
 			//Calculate busiest period
-			
+			var hours = [];
+			for(var i=0; i < appts.length; i++){ 
+				var d = new Date(appts[i]['created_at']*1000)
+				hours.push(d.getHours());
+			}
+			$('#busy_time').val(Metrics.mode(hours));
 		},
 		
-		on_time : function(apps){
-			
-			
+		on_time : function(appts){
+			// if seated_at - created_at < wait
+			var total_on_time = 0;
+			var total_seated = 0;
+			for(var i=0; i < appts.length; i++){ 
+				if (appts[i]['seated'] == "true"){
+						total_seated += 1;
+					if((appts[i]['seated_at'] - appts[i]['created_at']) <= appts[i]['wait']*60){
+						total_on_time += 1;
+					} 
+				}
+			}
+			$('#on_time').val(total_on_time/total_seated*100);
 		},
 		fulfill : function(appts){
 			//Calculate % fill
@@ -62,6 +78,26 @@
 				}
 			}
 			$('#fulfill').val(total_filled/appts.length*100);
+		},
+		mode : function(array){
+		    	if(array.length == 0)
+		    	    return null;
+		    	var modeMap = {};
+		    	var maxEl = array[0], maxCount = 1;
+		    	for(var i = 0; i < array.length; i++)
+		    	{
+		    	    var el = array[i];
+		    	    if(modeMap[el] == null)
+		    	            modeMap[el] = 1;
+		    	    else
+		    	            modeMap[el]++;  
+		    	    if(modeMap[el] > maxCount)
+		    	    {
+		    	            maxEl = el;
+		    	            maxCount = modeMap[el];
+		    	    }
+		    	}
+		    	return maxEl;
 		}
 	};
 
@@ -74,7 +110,8 @@
 				"party" : "<%= appt.party %>",
 				"wait" : "<%= appt.wait %>",
 				"seated" : "<%= appt.seated %>",
-				"created_at" : "<%= appt.updated_at %>"
+				"seated_at" : "<%= appt.seated_at.to_i %>",
+				"created_at" : "<%= appt.created_at.to_i %>"
 			}
 			<% if appt != @appointments.last %>,<% end %>
 		<% end %>
@@ -83,9 +120,31 @@
 		Metrics.waiting(appts);
 		Metrics.party_size(appts);
 		Metrics.fulfill(appts);
+		Metrics.on_time(appts);
+		Metrics.busy_time(appts);
 		
 		$('#party').bind('change', function(){
 			Metrics.waiting(appts);
+		});
+		
+		var data = [
+			<% @appointments.each do |appt| %>
+				["<%= appt.created_at.to_i %>", "<%= appt.wait %>"]
+				<% if appt != @appointments.last %>,<% end %>
+			<% end %>
+		];
+		
+		$.jqplot('chartdiv',  [data], {
+				axes: {
+					xaxis: {
+						min: data[0][0],
+						max: data[data.length - 1][0]
+					},
+					yaxis: {
+						min: 0,
+						max: 200
+					}
+				}
 		});
 	});
 

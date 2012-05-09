@@ -1,6 +1,7 @@
 class AppointmentsController < ApplicationController
   
   helper_method :sort_column, :sort_direction
+  before_filter :signed_in
   
   def index
     @title = "Today's queue"
@@ -27,11 +28,13 @@ class AppointmentsController < ApplicationController
 
     twilio_setup
     
-    # If provide telephone # & not already in db, create new customer in database
-    if !params[:appointment][:phone].empty?
-      if !check_phone_in_db(params[:appointment][:phone])
-        customer = Customer.create(:name => params[:appointment][:name], :phone => params[:appointment][:phone])
-        @appointment.update_attributes(:customer_id => customer.id)
+    if @appointment.valid?
+      # If provide telephone # & not already in db, create new customer in database
+      if !params[:appointment][:phone].empty?
+        if !check_phone_in_db(params[:appointment][:phone])
+          customer = Customer.create(:name => params[:appointment][:name], :phone => params[:appointment][:phone])
+          @appointment.update_attributes(:customer_id => customer.id)
+        end
       end
     end
     
@@ -44,7 +47,9 @@ class AppointmentsController < ApplicationController
 
     respond_to do |format|
       if @appointment.save
-	  	  format.html { redirect_to(appointments_path) }
+	  	  format.html { redirect_to(appointments_path, :notice => "New appt. created") }
+  	  else
+  	    format.html { redirect_to(appointments_path, :notice => "You must enter a name for the appointment") }
       end
     end
   end
@@ -72,7 +77,7 @@ class AppointmentsController < ApplicationController
     #            :body => 'Your table is ready! http://172.28.113.131/customer/1'
     #          )
     #     
-    redirect_to :action => 'index'
+    redirect_to appointments_url, :notice => "Text sent to #{params[:phone]}"
   end
   
   def seat
@@ -84,23 +89,24 @@ class AppointmentsController < ApplicationController
   end
   
   def book_and_seat
-    appt = Appointment.new
-    appt.name = params[:name]
-    appt.party = params[:party]
-    appt.wait = 0
-    appt.restaurant_id = current_restaurant.id
-    appt.seated = true
-    appt.seated_at = Time.now
-    appt.phone = params[:phone]
+    h = { :name => "Anonymous", :party => params[:party], :wait => 0, :restaurant_id => current_restaurant.id }
+      #,:seated => true, :seated_at => Time.now, :phone => params[:phone] }
     
-    if check_phone_in_db(params[:phone])
-      appt.customer_id = Customer.where(:phone => params[:phone]).first.id
-    else
-      #Create new customer
-      customer = Customer.create(:name => params[:name], :phone => params[:phone])
-      appt.customer_id = customer.id
+    appt = Appointment.new(h)   
+     
+    if appt.open_table?
+      appt.save
+      appt.update_attributes(:seated => true, :seated_at => Time.now)
     end
-    appt.save
+    
+    
+    # if check_phone_in_db(params[:phone])
+    #       appt.customer_id = Customer.where(:phone => params[:phone]).first.id
+    #     else
+    #       #Create new customer
+    #       customer = Customer.create(:name => params[:name], :phone => params[:phone])
+    #       appt.customer_id = customer.id
+    #     end
     
     #send a text for special deals w/ no wait
     

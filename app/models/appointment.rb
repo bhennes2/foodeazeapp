@@ -1,9 +1,11 @@
 class Appointment < ActiveRecord::Base
   
-  attr_accessible :name, :party, :wait, :phone, :restaurant_id, :seated, :customer_id, :seated_at
+  attr_accessible :name, :party, :wait, :phone, :restaurant_id, :seated, :customer_id, :seated_at, :location
   
   belongs_to :restaurant
   belongs_to :customer
+  
+  validates :name, :presence => true
 
   start_of_day = Time.new(Time.now.year, Time.now.month, Time.now.day)
   scope :today_queue, where("created_at >= :today_start AND created_at <= :now", 

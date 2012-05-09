@@ -1,5 +1,7 @@
 class TableTypeController < ApplicationController
   
+  before_filter :signed_in
+  
   def index
     @title = "Set up the layout for your restaurant"
     

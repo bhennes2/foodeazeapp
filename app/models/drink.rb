@@ -3,5 +3,7 @@ class Drink < ActiveRecord::Base
   
   belongs_to :post
   
+  validates :content, :presence => true
+  
   #has_one :restaurant, :through => :post
 end

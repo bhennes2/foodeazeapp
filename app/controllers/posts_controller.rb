@@ -1,5 +1,7 @@
 class PostsController < ApplicationController
   
+  before_filter :signed_in
+  before_filter :correct_restaurant, :only => [:edit]
   
   def index
     @title = 'My posts'

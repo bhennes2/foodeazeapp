@@ -19,10 +19,10 @@ FoodEazeApp::Application.routes.draw do
   post "/book-and-seat" => 'appointments#book_and_seat', :as => :book_and_seat
   
   match "/auth/:provider/callback" => "sessions#create"
-  match "/signout" => "sessions#destroy", :as => :signout
+  post "/signout" => "sessions#destroy", :as => :signout
   
-  match "/text-message" => "appointments#sendtext"
-  match "/seat" => "appointments#seat"
+  post "/text-message" => "appointments#sendtext"
+  post "/seat/:id" => "appointments#seat"
   
   match "/customer" => "customers#index"
   match "/customer/:id" => "customers#show"
