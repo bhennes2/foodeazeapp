@@ -1,17 +1,27 @@
-<h1><%= @customer.name %></h1>
+<div class="well">
+	<h1><%= @customer.name %></h1>
 
-<p>Your current wait is: <input type="text" id="wait-<%= @customer.appointments.last.id %>" value="<%= wait_time_left(@customer.appointments.last.created_at, @customer.appointments.last.wait) %>" > at <%= @restaurant.name %></p>
+	<p>Current wait is:</p>
+	<h1 class="well" id="wait-<%= @customer.appointments.last.id %>"></h1>
+	<% wait_time_left(@customer.appointments.last.created_at, @customer.appointments.last.wait) %>
+	<p>at <%= current_restaurant.name %></p>
+	<%= image_tag current_restaurant.pic %>
 
-<p><strong>Food: </strong><%= @restaurant.foods.last.content %></p>
-<p><strong>Drink: </strong><%= @restaurant.drinks.last.content %></p>
-
-<p>See what's <%= link_to "nearby", customer_path %> while you wait </p>
-
+	<p>
+		<strong>See some food specials: </strong>
+		<%= @restaurant.foods.last.content %>
+	</p>
+	<p>
+		<strong>And some drink specials: </strong>
+		<%= @restaurant.drinks.last.content %>
+	</p>
+	<p>See what's <%= link_to "nearby", customer_path %> while you wait </p>
+</div>
 <script>
 
 var wait = { 
 	"id" : "wait-<%= @customer.appointments.last.id %>",
-	"wait" : "<%= wait_time_left(@customer.appointments.last.created_at, @customer.appointments.last.wait) %>"
+	"wait" : "45:00"
 };
 
 change_time();
@@ -63,7 +73,7 @@ function countdown(){
 			time_array[0] -= 1;
 			time_array[1] = 59;
 			var val = time_array[0] + ':' + time_array[1];
-			$('#'+wait["id"]).val(val);
+			$('#'+wait["id"]).html(val);
 			wait["wait"] = val;
 			return wait;
 		}
@@ -73,7 +83,7 @@ function countdown(){
 				time_array[1] = "0"+time_array[1];
 			}
 			var val = time_array[0] + ':' + time_array[1];
-			$('#'+wait["id"]).val(val);
+			$('#'+wait["id"]).html(val);
 			wait["wait"] = val;
 			if (time_array[0] == 0 && time_array[1] == 0){
 				$('#alerts_header').append("<p>" + new Date() + "Party " + wait['id'] + " is ready!</p>");

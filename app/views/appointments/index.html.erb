@@ -294,11 +294,13 @@
 	
 		$('.alert_close').on('click', function(){
 			$(this).parent().remove();
-			var num_alerts = $('#alerts_header').children().length - 1
+			var num_alerts = $('#alerts_header').children().length - 1;
+			if (num_alerts < 0){num_alerts = 0;}
 			$('#alert_title').html('You have '+num_alerts+' alerts');
 		});
 		
 		var num_alerts = $('#alerts_header').children().length - 1
+		if (num_alerts < 0){num_alerts = 0;}
 		$('#alert_title').html('You have '+num_alerts+' alerts');
 		
 	});
