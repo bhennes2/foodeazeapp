@@ -1,4 +1,10 @@
-<h1><%= @post.id %></h1>
-<p><%= @post_content[:data].content%></p>
-<p><%= @post_content[:type] %></p>
+<div class="well">
+	<h1>You made a <%= @post_content[:type] %> post <%= time_ago_in_words(@post.created_at) %> ago</h1>
+	<p>You said:</p> 
+	<p><%= @post_content[:data].content%></p>
+	<% if @post.image.url != "/images/original/missing.png" %>
+		<%= image_tag @post.image.url %>
+	<% end %>
+</div>
+
 

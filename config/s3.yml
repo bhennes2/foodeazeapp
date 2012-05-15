@@ -1,0 +1,12 @@
+development:
+  bucket: foodeaze-dev
+  access_key_id: "AKIAJTRBA5BQ52FCYYXA"
+  secret_access_key: "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"
+test:
+  bucket: bucket-test
+  access_key_id: "AKIAJTRBA5BQ52FCYYXA"
+  secret_access_key: "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"
+production:
+  bucket: bucket-pro
+  access_key_id: "AKIAJTRBA5BQ52FCYYXA"
+  secret_access_key: "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"

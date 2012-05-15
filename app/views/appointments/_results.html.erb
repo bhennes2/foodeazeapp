@@ -1,23 +1,20 @@
-<p>
+<!-- <p>
 	Open: <%= pluralize(@appointments.count, 'appointment')%>
 	| Your average wait time is <%= pluralize(@avg_wait_time,'minute')%>
 	| 2: <%= pluralize(party_wait_time(2),'minute')%>
 	| 4: <%= pluralize(party_wait_time(4),'minute')%>
 	| 6: <%= pluralize(party_wait_time(6),'minute')%>
-</p>
-<table>
+</p> -->
+<table class="table">
   <tr>
-  	<th><%= sortable "id" %></th>
     <th><%= sortable "name" %></th>
     <th><%= sortable "party" %></th>
     <th><%= sortable "wait", "Wait time" %></th>
 	<th><%= sortable "phone" %></th>
 	<th><%= sortable "created_at", "Start" %></th>
-    <th><%= sortable "seated", "Seated?" %></th>
   </tr>
 <% @appointments.each do |appt| %>	
 	<tr>
-	  	<td><%= appt.id %></td>
 	    <td><%= appt.name %></td>
 		<td><%= appt.party %></td>
 	    <td id="wait_count-<%= appt.id %>"><%= wait_time_left(appt.created_at, appt.wait) %></td>
@@ -27,8 +24,7 @@
 			<% end %>
 		</td>
 		<td id="start<%= appt.id %>"><%= appt.created_at.strftime('%l:%M %p') %></td>
-	    <td><%= appt.seated %></td>
-		<td><%= button_to 'Delete', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %></td>
+		<td><%= button_to 'X', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %></td>
 		<% if appt.location.present? %>
 			<% if appt.location == 'outdoor'%>
 				<td><%= button_to 'Seat Outside', "/seat/#{appt.id}?location=outside" %></td>

@@ -1,4 +1,27 @@
-<%= link_to "FoodEaze", "/main" %> <img src="http://www.blogcdn.com/www.slashfood.com/media/2007/11/smittenkitchen_pumpkinwaffles.jpg" width="40">
-<% if current_restaurant %>
-	| Welcome <%= current_restaurant.name %> | <%= link_to 'Signout', '/signout', :method => :post %>
-<% end %>
+<div class="navbar navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container">
+      <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </a>
+      <%= link_to "FoodEaze", "/main", :class => 'brand' %>
+      <div class="nav-collapse">
+        <ul class="nav">
+          <!-- <li class="active"><a href="#">Home</a></li>-->
+					<% if current_restaurant %>
+						<li><%= link_to 'Back', :back %></li>
+						<li class="span6">&nbsp;</li>
+						<li>
+							<a href="<%= restaurant_profile_url(current_restaurant.name) %>">
+								<%= image_tag current_restaurant.pic, style: 'max-width: 25px;' %> <%= current_restaurant.name %>
+							</a>
+						</li>
+						<li><%= link_to 'Signout', '/signout', :method => :post %></li>
+					<% end %>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div>
+  </div>
+</div>

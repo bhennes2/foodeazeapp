@@ -10,11 +10,13 @@ class Restaurant < ActiveRecord::Base
   has_many :customers, :through => :appointments
   
   has_one :layout
+  has_many :table_types, :through => :layout
   
   def self.create_with_omniauth(auth)
     create! do |restaurant|
       restaurant.twitter_id = auth["uid"]
       restaurant.name = auth["info"]["nickname"]
+      restaurant.pic = auth['info']['image']
     end
   end
   

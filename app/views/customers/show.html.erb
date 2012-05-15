@@ -1,8 +1,89 @@
-<h1><%= @customer. name %></h1>
+<h1><%= @customer.name %></h1>
 
-<p>Your current wait is: <%= pluralize(wait_time_left(@customer.appointments[0].created_at, @customer.appointments[0].wait), 'minute') %> at <%= @restaurant.name %> </p>
+<p>Your current wait is: <input type="text" id="wait-<%= @customer.appointments.last.id %>" value="<%= wait_time_left(@customer.appointments.last.created_at, @customer.appointments.last.wait) %>" > at <%= @restaurant.name %></p>
 
-<p><strong>Food: </strong><%= @restaurant.foods.first.content %></p>
-<p><strong>Drink: </strong><%= @restaurant.drinks.first.content %></p>
-<p><strong>Deals: </strong></p>
-<p><strong>General: </strong></p>
+<p><strong>Food: </strong><%= @restaurant.foods.last.content %></p>
+<p><strong>Drink: </strong><%= @restaurant.drinks.last.content %></p>
+
+<p>See what's <%= link_to "nearby", customer_path %> while you wait </p>
+
+<script>
+
+var wait = { 
+	"id" : "wait-<%= @customer.appointments.last.id %>",
+	"wait" : "<%= wait_time_left(@customer.appointments.last.created_at, @customer.appointments.last.wait) %>"
+};
+
+change_time();
+
+function change_time(){
+	if (wait["wait"] != "0"){
+	 			countdown(wait["wait"]);
+				setTimeout(change_time, 1000);
+	}
+	else if (wait["wait"] == "0"){
+	 			alert("Your table is ready!");
+	}
+	
+};
+
+function countdown(){
+	/*if (wait["wait"] > 15){
+		wait_new = parseInt($('#'+wait["id"]).html());
+		$('#'+wait["id"]).html(wait_new);
+		wait["wait"] -= 1;
+		return wait;
+	}
+	else if (wait["wait"] == 15){
+		wait["wait"] = "14:59";
+		$('#'+wait["id"]).html(wait["wait"]);
+		setTimeout(countdown(wait), 1000);
+	}*/
+	//else {
+		//wait["wait"] = $('#'+wait["id"]).html();
+		var time_array = wait["wait"].split(':');
+		time_array[0] = parseInt(time_array[0]);
+		if (isNaN(time_array[1])){
+			time_array[1] = 0;
+		}
+		else {
+			if (time_array[1].substr(0,1) == "0"){
+				time_array[1] = parseInt(time_array[1].substr(1,1));
+			}
+			else {
+				time_array[1] = parseInt(time_array[1]);
+			}
+		}
+		if (time_array[0] == 0 && time_array[1] == 0){
+			$('#alerts_header').append("<p>" + new Date() + "Party " + wait['id'] + " is ready!</p>");
+			wait["wait"] = "0";
+			return wait;
+		}
+		else if (time_array[1] == 0){
+			time_array[0] -= 1;
+			time_array[1] = 59;
+			var val = time_array[0] + ':' + time_array[1];
+			$('#'+wait["id"]).val(val);
+			wait["wait"] = val;
+			return wait;
+		}
+		else {
+			time_array[1] -= 1;
+			if (time_array[1] < 10){
+				time_array[1] = "0"+time_array[1];
+			}
+			var val = time_array[0] + ':' + time_array[1];
+			$('#'+wait["id"]).val(val);
+			wait["wait"] = val;
+			if (time_array[0] == 0 && time_array[1] == 0){
+				$('#alerts_header').append("<p>" + new Date() + "Party " + wait['id'] + " is ready!</p>");
+				return wait;
+			}
+			else {
+				return wait;
+			}
+		}			
+};
+
+
+</script>

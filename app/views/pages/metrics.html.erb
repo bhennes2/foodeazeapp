@@ -1,4 +1,9 @@
-<h1>Metrics</h1><br />
+<h1>See how <%= current_restaurant.name %> is performing</h1>
+
+Appointments<br />
+Time <br />
+# of appts. per day - M, T, W, R, F, S, SU, # avg.
+avg. wait per day
 
 <p>Average waiting time: <input type="text" id="waiting_time"></p>
 <p>Party size: <%= select_tag "party", options_for_select((@parties).push("All"), "All") %></p>

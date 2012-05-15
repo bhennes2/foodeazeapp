@@ -17,6 +17,10 @@ class PagesController < ApplicationController
     @parties = party_sizes(@appointments)
   end
   
+  def profile
+    
+  end
+  
 
   
 end

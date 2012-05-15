@@ -1,8 +1,36 @@
-<h1>FoodEaze</h1>
-<img src="http://blogs.villagevoice.com/forkintheroad/rollcall.png" style="max-width: 150px;" />
-<p><em>Simplifying food to stomach delivery</em></p>
+<!-- Main hero unit for a primary marketing message or call to action -->
+<div class="hero-unit">
+  <h1>Hello, fellow restauranteur!</h1>
+  <p><em>Simplifying food to stomach delivery</em></p>
+	<% if !current_restaurant %>
+		<p><%= link_to "Twitter", "/auth/twitter", :class => "btn btn-primary btn-large" %></p>
+	<% end %>
+</div>
 
-<% if !current_restaurant %>
-	<p>Sign in with</p>
-	<%= link_to "Twitter", "/auth/twitter" %>
-<% end %>
+<!-- Example row of columns -->
+<div class="row">
+  <div class="span4">
+    <h2>Know Yourself</h2>
+     <p>
+				Metrics on how well you are performing
+				<%= image_tag "http://icons.iconarchive.com/icons/walrick/openphone/256/Graph-icon.png", :style => 'max-width: 200px;'%>
+		 </p>
+  </div>
+  <div class="span4">
+    <h2>Know Your Customers</h2>
+     <p>
+				Get feedback from customers while they wait
+				<%= image_tag "http://www.mahalkagroup.com/gallery/1314010972user-group-icon.png", :style => 'max-width: 200px;'%>
+			</p>
+ </div>
+  <div class="span4">
+    <h2>Better experience</h2>
+    <p>
+			Manage the expectations for all parties involved
+			<%= image_tag 'http://cdn1.iconfinder.com/data/icons/SUNNYDAY/business/png/400/alliance.png', :style => 'max-width: 200px;' %>
+		</p>
+	</div>
+</div>
+
+
+

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120508220119) do
+ActiveRecord::Schema.define(:version => 20120515015117) do
 
   create_table "appointments", :force => true do |t|
     t.string   "name"
@@ -27,6 +27,8 @@ ActiveRecord::Schema.define(:version => 20120508220119) do
     t.datetime "seated_at"
     t.string   "location"
   end
+
+  add_index "appointments", ["name"], :name => "index_appointments_on_name"
 
   create_table "customers", :force => true do |t|
     t.integer  "phone"
@@ -59,12 +61,16 @@ ActiveRecord::Schema.define(:version => 20120508220119) do
 
   create_table "posts", :force => true do |t|
     t.integer  "restaurant_id"
-    t.datetime "created_at",    :null => false
-    t.datetime "updated_at",    :null => false
+    t.datetime "created_at",         :null => false
+    t.datetime "updated_at",         :null => false
     t.integer  "food_id"
     t.integer  "drink_id"
     t.integer  "deal_id"
     t.integer  "general_id"
+    t.string   "image_file_name"
+    t.string   "image_content_type"
+    t.integer  "image_file_size"
+    t.datetime "image_updated_at"
   end
 
   create_table "restaurants", :force => true do |t|
@@ -72,6 +78,7 @@ ActiveRecord::Schema.define(:version => 20120508220119) do
     t.datetime "created_at", :null => false
     t.datetime "updated_at", :null => false
     t.integer  "twitter_id"
+    t.string   "pic"
   end
 
   create_table "table_types", :force => true do |t|

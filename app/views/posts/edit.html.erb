@@ -1,10 +1,12 @@
-<h1>Edit post</h1>
+<div class="well">
+	<h1>Edit post</h1>
 
-<%= form_tag post_path(@post.id), :method => 'PUT' do %>
-	<%= label_tag 'Subject :'%>
-	<%= select_tag :subject, options_for_select(["food", "drink", "popular", "deals"], @post_content[:type])%><br />
-	<%= label_tag 'Content :'%>
-	<%= text_area_tag :content, @post_content[:data].content, :rows => 20, :cols => 120 %>
-	<%= hidden_field_tag :restaurant_id, current_restaurant.id %><br />
-	<%= submit_tag 'Update!'%>
-<% end %>
+	<%= form_tag post_path(@post.id), :method => 'PUT' do %>
+		<%= label_tag 'Subject :'%>
+		<%= select_tag :subject, options_for_select(["food", "drink"], @post_content[:type])%><br />
+		<%= label_tag 'Content :'%>
+		<%= text_area_tag :content, @post_content[:data].content, :rows => 20, :cols => 120 %>
+		<%= hidden_field_tag :restaurant_id, current_restaurant.id %><br />
+		<%= submit_tag 'Update!'%>
+	<% end %>
+</div>

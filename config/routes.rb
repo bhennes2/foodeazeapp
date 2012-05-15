@@ -22,9 +22,13 @@ FoodEazeApp::Application.routes.draw do
   post "/signout" => "sessions#destroy", :as => :signout
   
   post "/text-message" => "appointments#sendtext"
-  post "/seat/:id" => "appointments#seat"
+  post "/seat" => "appointments#seat"
   
   match "/customer" => "customers#index"
   match "/customer/:id" => "customers#show"
+  
+  post '/done/:id' => 'appointments#done', :as => :done_eating
+  
+  get "/restaurant/:name" => 'pages#profile', :as => :restaurant_profile
   
 end

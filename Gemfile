@@ -28,6 +28,18 @@ gem 'omniauth-twitter'
 # Twilio
 gem 'twilio-ruby'
 
+# Twitter
+gem 'twitter'
+
+# Image upload with Paperclip
+gem 'paperclip'
+
+# Amazon S3
+gem 'aws-sdk', '~> 1.3.4'
+
+# Twitter bootstrap
+gem 'bootstrap-sass'
+
 # To use ActiveModel has_secure_password
 # gem 'bcrypt-ruby', '~> 3.0.0'
 

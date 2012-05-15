@@ -1,5 +1,7 @@
 class ApplicationController < ActionController::Base
   
+  require 'net/http'
+  
   #Protects only non-get requests
   protect_from_forgery
   
@@ -23,7 +25,7 @@ class ApplicationController < ActionController::Base
   private
   
     def current_restaurant
-      @current_restaurant ||= Restaurant.find(session[:restaurant_id]) if session[:restaurant_id]
+      @current_restaurant ||= Restaurant.find_by_id(session[:restaurant_id]) if session[:restaurant_id]
     end
     
 end

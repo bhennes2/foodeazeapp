@@ -1,9 +1,9 @@
-<%= form_for(@appointment) do |f| %>
-	Name: <%= f.text_field :name, :placeholder => "Enter a name" %>
+<%= form_for(@appointment, :html => { :class => 'form-inline' }) do |f| %>
+	<%= f.text_field :name, :placeholder => "Enter a name" %>
 	Party: <%= f.select :party, (1..15).to_a  %>
-	Phone: <%= f.text_field :phone, :autocomplete => 'off', :placeholder => 'Enter a phone #' %>
+	<%= f.text_field :phone, :autocomplete => 'off', :placeholder => 'Enter a phone #' %>
 	Wait time (mins): <%= f.select :wait, (10..90).to_a %>
-	Location: <%= f.select :location, ['indoor', 'outdoor'] %>
+	<%= f.select :location, ['indoor', 'outdoor'] %>
 	<%= f.hidden_field :restaurant_id, :value => current_restaurant.id %>
 	<%= f.hidden_field :seated, :value => false %>
 	<%= f.hidden_field :customer_id %>

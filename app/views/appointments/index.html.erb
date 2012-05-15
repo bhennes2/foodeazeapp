@@ -1,51 +1,139 @@
-<h1>Appointments for today: <%= Time.now.strftime("%B #{Time.now.day.ordinalize}, %Y") %>&nbsp;&nbsp;<span id="clock"></span></h1>
-<%= render :partial => 'form' %>
-<%= button_tag 'Book & seat now!', :id => "book_and_seat" %>
-<div id="alerts"><p id="alerts_header">Alerts:</p></div>
-<%= form_tag appointments_path, :method => :get, :id => "search_form" do %>
-	<%= hidden_field_tag :direction, params[:direction] %>
-	<%= hidden_field_tag :sort, params[:sort] %>
-  <p>
-    <%= text_field_tag :search, params[:search], :autocomplete => "off", :placeholder => "Search by name..." %>
-    <%= submit_tag "Search", :name => nil %>
-  </p>
-<% end %>
-
-<h3>Wait queue</h3>
-<% party_size = 0 %>
-<% @appointments_sorted.each_cons(2) do |appt, next_appt| %>
-	<% if party_size != appt.party %>
-		<% party_size = appt.party %>
-		<ol>Party: <strong><%= appt.party %></strong> | Avg. wait: <%= party_wait_time(appt.party)%>
+<section class="well">
+	<h1>Today's appointment: <%= Time.now.strftime("%B #{Time.now.day.ordinalize}, %Y") %>&nbsp;&nbsp;<span id="clock"></span></h1>
+	<%= render :partial => 'form' %>
+	<%= button_tag 'Book & seat now!', :id => "book_and_seat" %>
+	<%= form_tag appointments_path, :method => :get, :id => "search_form", :class => 'form-search' do %>
+		<%= hidden_field_tag :direction, params[:direction] %>
+		<%= hidden_field_tag :sort, params[:sort] %>
+	  <p>
+	    <%= text_field_tag :search, params[:search], :autocomplete => "off", :placeholder => "Search by name..." %>
+	    <%= submit_tag "Search", :name => nil %>
+	  </p>
 	<% end %>
-			<li><%= appt.name %> | <%= pluralize(appt.wait, 'minute') %> | <% button_to 'Delete', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %>
-				| <% button_to 'Seat this party', "/seat?id=#{appt.id}" %>
+</section>
+
+<div id="results" style="display: none;"><%= render :partial => 'results' %></div>
+
+<div id="alerts">
+	<span id="alert_title">Alerts:</span>
+	<div id="alerts_header"  style="overflow-y:scroll; height: 100px;">
+	</div>
+</div>
+
+<div class="tabbable">
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#tab1" data-toggle="tab">Waiting</a></li>
+    <li><a href="#tab2" data-toggle="tab">Sitting</a></li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane active" id="tab1">
+			<% if @appointments_sorted.count == 0 %>
+				<h3>No appointments for unseated guests right now. Phew. Nice work friend!</h3>
+			<% elsif @appointments_sorted.count == 1 %>
+				<ul class="well span4">
+					<h3>Party: <%= @appointments_sorted.first.party %> 
+						<span class="pull-right">
+								Wait: <%= estimated_wait_time(@appointments_sorted.first.party) %>
+						</span>
+					</h3>
+				<li>
+					<span class="span2"><%= @appointments_sorted.first.name %></span>
+					<span id="wait_count-<%= @appointments_sorted.first.id %>"><%= wait_time_left(@appointments_sorted.first.created_at, @appointments_sorted.first.wait) %></span>
+					<%= link_to 'X', appointment_url(@appointments_sorted.first.id) , :method => :delete, :confirm => 'Are you sure?' %>
+					<%= link_to 'Seat', "/seat?id=#{@appointments_sorted.first.id}", :method => :post %>
 				</li>
-	<% if appt.party != next_appt.party %>
-		</ol>
-	<% end %>
-<% end %>
-
-<h3>What's available</h3>
-<% @table_types.each do |table| %>
-	<ol><%= table.size%>-top | Wait: <%= pluralize(estimated_wait_time(table.size), 'minute') %>
-		<% @people_eating.each do |people| %>
-			<% if people[:party] == table.size %>
-				<% @size = people[:appointments].length %>
-				<% people[:appointments].each do |appt| %>
-					<li><%= appt.name %> | <%= dining_time_left(appt.updated_at, table.turnover) %></li>
+				</ul>
+			<% else %>
+	      <% party_size = 0 %>
+				<% @appointments_sorted.each_cons(2) do |appt, next_appt| %>
+					<% if party_size != appt.party %>
+						<% party_size = appt.party %>
+						<ul class="well span4">
+							<h3>Party: <%= appt.party %> 
+								<span class="pull-right">
+										Wait: <%= estimated_wait_time(appt.party) %>
+								</span>
+							</h3>
+					<% end %>
+						<li>
+							<span class="span2"><%= appt.name %></span>
+							<span id="wait_count-<%= appt.id %>"><%= wait_time_left(appt.created_at, appt.wait) %></span>
+							<%= link_to 'X', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %>
+							<%= link_to 'Seat', "/seat?id=#{appt.id}", :method => :post %>
+						</li>
+					<% if next_appt == @appointments_sorted.last %>
+						<% if appt.party != next_appt.party %>
+							</ul>
+							<ul class="well span4">
+								<h3>Party: <%= next_appt.party %>
+									<span class="pull-right">
+										Wait: <%= estimated_wait_time(next_appt.party) %>
+									</span>
+								</h3>
+								<li>
+									<span class="span2"><%= next_appt.name %></span>
+									<span id="wait_count-<%= next_appt.id %>"><%= wait_time_left(next_appt.created_at, next_appt.wait) %></span>
+									<%= link_to 'X', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %>
+									<%= link_to 'Seat', "/seat?id=#{next_appt.id}", :method => :post %>
+								</li>
+							</ul>
+						<% else %>
+								<li>
+									<span class="span2"><%= next_appt.name %></span>
+									<span id="wait_count-<%= next_appt.id %>"><%= wait_time_left(next_appt.created_at, next_appt.wait) %></span>
+									<%= link_to 'X', appointment_url(appt.id) , :method => :delete, :confirm => 'Are you sure?' %>
+									<%= link_to 'Seat', "/seat?id=#{next_appt.id}", :method => :post %>
+								</li>
+							</ul>
+						<% end %>
+					<% end %>
+					<% if appt.party != next_appt.party %>
+						</ul>
+					<% end %>
 				<% end %>
+		<% end %>
+    </div>
+    <div class="tab-pane" id="tab2">
+      <h3>What's available</h3>
+			<% @table_types.each do |table| %>
+				<ol class="well span4">
+					<h3><%= image_tag "http://www.gettyicons.com/free-icons/125/miscellaneous/png/256/table_256.png", :style => 'max-width: 30px;' %>
+					<%= table.size %>-top (
+						<% if table.location == "Outdoor" %>
+									<%= image_tag "http://icons.iconarchive.com/icons/weer/weather/128/sun-icon.png", :style => 'max-width: 30px;' %>
+						<% else %>
+									<%= image_tag "http://www.adamsonroofing.ca/images/roof_icon.png", :style => 'max-width: 30px;'%>
+						<% end %>
+							)
+					Wait: <%= estimated_wait_time(table.size) %>
+					</h3>
+						<% @size = 0 %>
+						<% @people_eating.each do |people| %>
+							<% if people[:appointments].first.table_size_fit_and_turnover[:size] == table.size %>
+								<% @size = people[:appointments].length %>
+								<% people[:appointments].each do |appt| %>
+									<li>
+										<%= appt.name %>
+										<span id="wait_count-<%= appt.id %>"><%= dinner_time_left(appt.seated_at, table.turnover) %></span>
+										<%= link_to 'Done', done_eating_path(appt.id), :method => :post %>
+									</li>
+								<% end %>
+								<% (table.quantity - @size).times do %>
+									<li></li>
+								<% end %>
+							<% end %>
+						<% end %>
+						
+						<% if @size == 0 %>
+							<% table.quantity.times do %>
+								<li></li>
+							<% end %>
+						<% end %>
+				</ol>
 			<% end %>
-			<% @size ||= 0 %>	
-		<% end %>
-		
-		<% (table.quantity - @size).times do %>
-			<li></li>
-		<% end %>
-	</ol>
-<% end %>
-
-<div id="results"><%= render :partial => 'results' %></div>
+    </div>
+  </div>
+</div>
 
 <script>
 	$(document).ready(function(){
@@ -65,6 +153,14 @@
 			return false;
 		});
 		
+		$('#search').focus(function(){
+			$('#results').slideDown();
+		});
+		
+		$('#search').blur(function(){
+			$('#results').slideUp();
+		});
+		
 		// var wait_a = $('td[id|="wait_count"]');
 		// 		var wait_object = [];
 		// 		for(var i=0; i < wait_a.length; i++){
@@ -75,12 +171,17 @@
 		// 				wait_object.push(wait);
 		// 		}
 		
-		var wait_object = [	<% @appointments.each do |appt| %>
+		var wait_object = [	<% @all_appointments.each do |appt| %>
 								{ "id" : "wait_count-<%= appt.id %>",
-								  "wait" : "<%= wait_time_left(appt.created_at, appt.wait) %>",
-									"name" : "<%= appt.name %>"
+									<% if appt.seated == true %>
+								  	"wait" : "<%= wait_time_left(appt.seated_at, appt.table_size_fit_and_turnover[:turnover]) %>",
+									<% else %>
+										"wait" : "<%= wait_time_left(appt.created_at, appt.wait) %>",
+									<% end %>
+									"name" : "<%= appt.name %>",
+									"seated" : "<%= appt.seated %>"
 								}
-							<% if appt != @appointments.last %>,<% end %>
+							<% if appt != @all_appointments.last %>,<% end %>
 						<% end %>
 		];
 		
@@ -89,8 +190,8 @@
 		
 		function show_alerts(){
 			for(var i=0; i < wait_object.length; i++){	
-					if (wait_object[i]["wait"] == "0"){
-			 			$('#alerts_header').append("<p>" + new Date() + "Party " + wait_object[i]["name"] + " is ready!</p>");
+					if (wait_object[i]["wait"] == "0" && wait_object[i]["seated"] == "false"){
+			 			$('#alerts_header').append("<p>" + new Date() + "Party " + wait_object[i]["name"] + " is ready! <a class='alert_close'>X</a></p>");
 					}
 			}
 		};
@@ -190,7 +291,15 @@
 			  $('#clock').html(currentTimeString);
 			setTimeout(update_clock, 1000);
 		};
+	
+		$('.alert_close').on('click', function(){
+			$(this).parent().remove();
+			var num_alerts = $('#alerts_header').children().length - 1
+			$('#alert_title').html('You have '+num_alerts+' alerts');
+		});
 		
+		var num_alerts = $('#alerts_header').children().length - 1
+		$('#alert_title').html('You have '+num_alerts+' alerts');
 		
 	});
 

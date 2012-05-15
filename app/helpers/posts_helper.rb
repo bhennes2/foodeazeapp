@@ -3,14 +3,16 @@ module PostsHelper
   def create_post(params)
     subject = params[:subject]
     
+    
     if subject == 'food'
       food_special = Food.create(:content => params[:content])
-      post = Post.create(:restaurant_id => params[:restaurant_id], :food_id => food_special.id )
+      data = { restaurant_id: params[:restaurant_id], food_id: food_special.id, image: params[:image] }
+      post = Post.create(data)
       food_special.post_id = post.id
       food_special.save
     elsif subject == 'drink'
       drink_special = Drink.create(:content => params[:content])
-      post = Post.create(:restaurant_id => params[:restaurant_id], :drink_id => drink_special.id )
+      post = Post.create(data)
       drink_special.post_id = post.id
       drink_special.save
     end
@@ -44,5 +46,8 @@ module PostsHelper
       # delete old post & start another
     end
   end
+  
+  
+
   
 end

@@ -5,16 +5,19 @@ class AppointmentsController < ApplicationController
   
   def index
     @title = "Today's queue"
+    
     @appointment = Appointment.new
     #@appointments = current_restaurant.appointments.today_queue.order(params[:sort])
-    @appointments = current_restaurant.appointments.search(params[:search]).order(sort_column + " " + sort_direction)
-    @appointments_sorted = current_restaurant.appointments.order(:party)
-    @customers = Customer.all
-    @avg_wait_time = avg_wait_time(@appointments)
+    @appointments = current_restaurant.appointments.today_queue.not_seated.order(sort_column + " " + sort_direction).search(params[:search])
+    @appointments_sorted = current_restaurant.appointments.order('party DESC').today_queue.not_seated
+    @all_appointments = current_restaurant.appointments.today_queue
     
-    @table_types = current_restaurant.layout.table_types
-    @party_sizes_eating = current_restaurant.appointments.party_eating
-    @people_eating = organize_by_party_size(current_restaurant.appointments.eating, @party_sizes_eating)
+    @customers = Customer.all
+    @avg_wait_time #= avg_wait_time(@appointments)
+    
+    @table_types = current_restaurant.table_types.order(:size)
+    @party_sizes_eating = current_restaurant.appointments.today_queue.party_eating
+    @people_eating = organize_by_party_size(current_restaurant.appointments.today_queue.eating, @party_sizes_eating)
     
     respond_to do |format|
       format.html
@@ -47,7 +50,7 @@ class AppointmentsController < ApplicationController
 
     respond_to do |format|
       if @appointment.save
-	  	  format.html { redirect_to(appointments_path, :notice => "New appt. created") }
+	  	  format.html { redirect_to(appointments_path, :notice => "You just booked #{@appointment.name}, party of #{@appointment.party}") }
   	  else
   	    format.html { redirect_to(appointments_path, :notice => "You must enter a name for the appointment") }
       end
@@ -63,7 +66,7 @@ class AppointmentsController < ApplicationController
     @appointment = Appointment.find_by_id(params[:id])
     @appointment.destroy
     
-    redirect_to :action => 'index'
+    redirect_to appointments_url, :notice => "You just removed #{@appointment.name}, party of #{@appointment.party}"
   end
   
   def sendtext
@@ -84,8 +87,12 @@ class AppointmentsController < ApplicationController
     @appointment = Appointment.find_by_id(params[:id])
     if @appointment.open_table?
       @appointment.update_attributes(:seated => true, :seated_at => Time.now)
+      flash[:notice] = "You just seated #{@appointment.name}, party of #{@appointment.party}"
+      redirect_to :action => 'index'
+    else
+      redirect_to appointments_url, :notice => 'Sorry no table is open right now!'
     end
-    redirect_to :action => 'index'
+    
   end
   
   def book_and_seat
@@ -110,6 +117,15 @@ class AppointmentsController < ApplicationController
     
     #send a text for special deals w/ no wait
     
+  end
+  
+  def done
+    appt = Appointment.find_by_id(params[:id])
+    appt.done = true
+    appt.save
+    flash[:notice] = "#{appt.name}, party of #{appt.party} just finished their meal!"
+    
+    redirect_to :action => 'index'
   end
 
   private

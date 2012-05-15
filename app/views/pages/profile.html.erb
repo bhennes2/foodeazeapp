@@ -1,0 +1,5 @@
+<div class="well">
+	<h4>Hey <%= current_restaurant.name %>, see a bit about yourself</h4>
+	<p><%= image_tag current_restaurant.pic %></p>
+	<p>Total appointments (to date) = <%= current_restaurant.appointments.count %></p>
+</div>
