@@ -9,7 +9,7 @@ class AppointmentsController < ApplicationController
     @appointment = Appointment.new
     #@appointments = current_restaurant.appointments.today_queue.order(params[:sort])
     @appointments = current_restaurant.appointments.today_queue.not_seated.order(sort_column + " " + sort_direction).search(params[:search])
-    @appointments_sorted = current_restaurant.appointments.order('party DESC').today_queue.not_seated
+    @appointments_sorted = current_restaurant.appointments.order('party ASC').today_queue.not_seated
     @all_appointments = current_restaurant.appointments.today_queue
     
     @customers = Customer.all

@@ -17,7 +17,7 @@
 	<tr>
 	    <td><%= appt.name %></td>
 		<td><%= appt.party %></td>
-	    <td id="wait_count-<%= appt.id %>"><%= wait_time_left(appt.created_at, appt.wait) %></td>
+	    <td id="current-<%= appt.id %>"><%= wait_time_left(appt.created_at, appt.wait) %></td>
 		<td>
 			<% if appt.phone.present? %>
 				<%= button_to "#{appt.phone}", "/text-message?phone=#{appt.phone}&id=#{appt.id}", :confirm => "SMS customer?" %>

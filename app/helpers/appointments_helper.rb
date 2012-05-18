@@ -73,13 +73,9 @@ module AppointmentsHelper
   def determine_table_size(tables, party_size)
     tables.each do |table|
       if table.size >= party_size
-        table_size_fit = table.size
-        table_turnover = table.turnover
-        return { size: table_size_fit, turnover: table_turnover }
+        return { :size => table.size, :turnover => table.turnover, :quantity => table.quantity }
       elsif table == tables.last #&& table_size_fit == 0
-        table_size_fit = table.size
-        table_turnover = table.turnover
-        return { size: table_size_fit, turnover: table_turnover }
+        return { :size => table.size, :turnover => table.turnover, :quantity => table.quantity }
       end
     end
   end
@@ -106,58 +102,75 @@ module AppointmentsHelper
     data
   end
   
-  def dining_time_left(seated_at, wait)
+  def dining_time_left(seated_at, turnover)
     diff = Time.now.utc - seated_at
-    diff = diff/60.to_i
-    diff = (wait - diff).ceil
-    diff
+    diff = (diff/60).to_i
+    diff = (turnover - diff).ceil
+    return diff
   end
   
   def estimated_wait_time(party_size)
     
     tables = current_restaurant.table_types
     
-    party_size = determine_table_size(tables, party_size)[:size]
+    # issue w/ determining party size
+    #size = determine_table_size(tables, party_size)[:size]
     
     result = current_restaurant.table_types.where(:size => party_size).first
+
+    turnover = result.turnover
+
     total_available = result.quantity
-    people_eating = current_restaurant.appointments.party_eating_sorted(party_size).today_queue
+
+    appts = current_restaurant.appointments.today_queue.where(:seated => true, :done => nil)
+    people_eating = Array.new
+    
+    appts.each do |appt|
+      if appt.table_size_fit_and_turnover[:size] == party_size
+        people_eating << appt
+      end
+    end
+    
+    puts "eating: #{people_eating.count}, seats: #{total_available}"
 
     if people_eating.count < total_available
       # If no one is waiting
       return "Open"
-    elsif people_eating.count >= total_available
+    elsif people_eating.count == total_available
       # People are now waiting
-      turnover = result.turnover
+      
       
       people_eating_time_remaining = Array.new
       people_eating.each do |people|
         people_eating_time_remaining << dining_time_left(people.seated_at, turnover)
       end
       
-      people_waiting = current_restaurant.appointments.party_waiting_sorted(party_size)
-              
-      if people_eating.length >= people_waiting.length
+      people_waiting = current_restaurant.appointments.today_queue.party_waiting_sorted(party_size)
+  
+      if people_eating.length > people_waiting.length
         # If waiting & # wait line is less than # of people_eating 
         wait_time = 0
-        people_waiting.each_index do |i| 
-          wait_time += people_eating_time_remaining[i]
+        ctr = 0
+        (people_waiting.length + 1).times do 
+          wait_time += people_eating_time_remaining[ctr]
+          ctr += 1
         end
         if wait_time < 0
           return "Check" 
         end
         return wait_time
-      elsif people_eating.length < people_waiting.length
-        # If waiting & # wait line is greater than # of people_eating 
-        diff = people_waiting.length - people_eating.length
-        wait_time = people_eating_time_remaining.inject(:+)
-        wait_time += diff * turnover
-        if wait_time < 0
-          return "Check"
-        end
-        return wait_time
-      end
+      elsif people_eating.length <= people_waiting.length
+         # If waiting & # wait line is greater than # of people_eating 
+         diff = people_waiting.length - people_eating.length + 1
+         wait_time = people_eating_time_remaining.inject(:+)
+         wait_time += diff * turnover
+              if wait_time < 0
+                return "Check"
+              end
+              return wait_time
+            end
     end
   end
-  
+   
 end
+
