@@ -18,6 +18,21 @@ class AppointmentsController < ApplicationController
     @table_types = current_restaurant.table_types.order(:size)
     @party_sizes_eating = current_restaurant.appointments.today_queue.party_eating
     @people_eating = organize_by_party_size(current_restaurant.appointments.today_queue.eating, @party_sizes_eating)
+     
+    @appointments_seated = current_restaurant.appointments.where(:seated => true, :done => nil)
+    @table_type = current_restaurant.table_types.where(:size => 6).first
+    @open_tables = Array.new
+    @appointments_seated.each do |appt|
+      @table_type.position.each do |table|
+        flag = false
+        if table[:id] == appt.table_id
+          flag = true
+        end
+        if !flag
+          @open_tables.push(table[:id])
+        end
+      end
+    end
     
     respond_to do |format|
       format.html
@@ -86,18 +101,36 @@ class AppointmentsController < ApplicationController
   def seat
     @appointment = Appointment.find_by_id(params[:id])
     if @appointment.open_table?
+      #table_id?????
+      @appointments_seated = current_restaurant.appointments.where(:seated => true, :done => nil)
+      @table_type = current_restaurant.table_types.where(:size => @appointment.size)
+      open_tables = Array.new
+      @appointments_seated.each do |appt|
+        @table_type.position.each do |table|
+          flag = false
+          if table.id == appt.table_id
+            flag = true
+          end
+          if !flag
+            open_tables.push(table.id)
+          end
+        end
+      end
+          
       @appointment.update_attributes(:seated => true, :seated_at => Time.now)
       flash[:notice] = "You just seated #{@appointment.name}, party of #{@appointment.party}"
       redirect_to :action => 'index'
     else
       redirect_to appointments_url, :notice => 'Sorry no table is open right now!'
     end
-    
+
   end
   
   def book_and_seat
     h = { :name => "Anonymous", :party => params[:party], :wait => 0, :restaurant_id => current_restaurant.id }
       #,:seated => true, :seated_at => Time.now, :phone => params[:phone] }
+    
+    #table_id??????
     
     appt = Appointment.new(h)   
      

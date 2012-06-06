@@ -12,28 +12,110 @@
 		<%= f.submit "Add" %>
 	<% end %>
 </div>
-<div class="well">
-	<h1>Here is the current layout for <%= current_restaurant.name %></h1>
-	<ul>
-		<% @table_types.each do |table| %>
-			<li>
-				<%= table.size %>-top (<%= table.quantity %>)
-				<% table.quantity.times do %>
-					<%= image_tag "http://www.gettyicons.com/free-icons/125/miscellaneous/png/256/table_256.png", style: 'max-width: 30px;'%>
-				<% end %>
-				 | Turnover: <%= pluralize(table.turnover, 'minute') %> 
-				| Location: 
-				<% if table.location == 'Outdoor' %>
-					<%= image_tag "http://icons.iconarchive.com/icons/weer/weather/128/sun-icon.png", style: 'max-width: 30px;' %>
-				<% else %>
-					<%= image_tag "http://www.adamsonroofing.ca/images/roof_icon.png", style: 'max-width: 30px;' %>
-				<% end %>
-				| <%= link_to 'X', table_type_path(table.id),:method => :delete, :confirm => 'Are you sure?' %>
-			</li>
-		<% end %>
-	</ul>
+
+<div class="tabbable">
+  <ul class="nav nav-tabs">
+    <li class="active"><a href="#tab1" data-toggle="tab">Inventory</a></li>
+    <li><a href="#tab2" data-toggle="tab">Layout</a></li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane active" id="tab1">
+	    <h1>Here is the current table inventory for <%= current_restaurant.name %></h1>
+    	<ul>
+    		<% @table_types.each do |table| %>
+    			<li>
+    				<%= table.size %>-top (<%= table.quantity %>)
+    				<% table.quantity.times do %>
+    					<%= image_tag "http://www.gettyicons.com/free-icons/125/miscellaneous/png/256/table_256.png", style: 'max-width: 30px;'%>
+    				<% end %>
+    				 | Turnover: <%= pluralize(table.turnover, 'minute') %> 
+    				| Location: 
+    				<% if table.location == 'Outdoor' %>
+    					<%= image_tag "http://icons.iconarchive.com/icons/weer/weather/128/sun-icon.png", style: 'max-width: 30px;' %>
+    				<% else %>
+    					<%= image_tag "http://www.adamsonroofing.ca/images/roof_icon.png", style: 'max-width: 30px;' %>
+    				<% end %>
+    				| <%= link_to 'X', table_type_path(table.id),:method => :delete, :confirm => 'Are you sure?' %>
+    			</li>
+    		<% end %>
+    	</ul>
+    </div>
+  <div class="tab-pane" id="tab2">
+    
+    <%= button_tag 'Save layout!', :id => :update_layout %>
+    <div style='border: 1px solid black; height: 500px; width: 500px;'>
+    
+        <% ctr = 1 %>
+        <% @table_types.each do |table| %>
+          <% table.quantity.times do %>
+            <span class='table-layout' id='table-<%= ctr %>-<%= table.size %>'>
+              <%= image_tag "http://www.gettyicons.com/free-icons/125/miscellaneous/png/256/table_256.png", style: 'max-width: 30px;'%>
+              #<%= ctr %>:<%= table.size %>
+            </span>
+            <% ctr += 1 %>
+          <% end %>
+        <% end %>
+      </div>
+  </div>
 </div>
 
+<script>
+
+  $(document).ready(function(){
+    $('.table-layout').draggable();
+    
+    var els = $('.table-layout');
+    var positions = {
+      <% @table_types.each do |table| %>
+
+          <% table.position.each do |position| %>
+
+                  '<%= position[:id] %>' : {
+                    'top' : <%= position[:top] %>,
+                    'left' : <%= position[:left] %>,
+                    'size' : <%= table.size %>
+                  }
+
+            <% if position != table.position.last %>,<% end %>
+          <% end %>
+        <% if table != @table_types.last %>,<% end %>
+      <% end %>
+    };
+    
+    for(var i=0; i < els.length; i++){
+      //var id_info = els[i].id.split('-');
+      $('#'+els[i].id).css({ position: 'absolute', top: positions[i+1]['top']+'px', left: positions[i+1]['left']+'px' });
+    }
+    
+    $('#update_layout').on('click', function(){
+      var els = $('.table-layout');
+      var positions = new Array();
+      
+      for(var i=0; i < els.length; i++){
+        var id_info = els[i].id.split('-');
+        positions.push({
+          'id' : id_info[1],
+          'size' : id_info[2],
+          'top' : $('#'+els[i].id).offset().top,
+          'left' : $('#'+els[i].id).offset().left
+        });  
+      }
+      
+      $.ajax({
+        url: '<%= layout_update_url %>',
+        type: 'POST',
+        data: { 'el_positions' : positions },
+        dataType: 'script'
+      }).done(function(){
+        alert('w00t!');
+      });
+      
+      return false;
+    });
+    
+  });
+
+</script>
 
 
 

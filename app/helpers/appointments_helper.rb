@@ -122,7 +122,7 @@ module AppointmentsHelper
 
     total_available = result.quantity
 
-    appts = current_restaurant.appointments.today_queue.where(:seated => true, :done => nil)
+    appts = current_restaurant.appointments.today_queue.where(:seated => true, :done => nil).order('seated_at ASC')
     people_eating = Array.new
     
     appts.each do |appt|
@@ -130,8 +130,6 @@ module AppointmentsHelper
         people_eating << appt
       end
     end
-    
-    puts "eating: #{people_eating.count}, seats: #{total_available}"
 
     if people_eating.count < total_available
       # If no one is waiting
@@ -149,21 +147,25 @@ module AppointmentsHelper
   
       if people_eating.length > people_waiting.length
         # If waiting & # wait line is less than # of people_eating 
-        wait_time = 0
-        ctr = 0
-        (people_waiting.length + 1).times do 
-          wait_time += people_eating_time_remaining[ctr]
-          ctr += 1
-        end
+        wait_time = people_eating_time_remaining[(people_waiting.length)]
+        # wait_time = 0
+        #         ctr = 0
+        #         (people_waiting.length + 1).times do 
+        #           wait_time += people_eating_time_remaining[ctr]
+        #           ctr += 1
+        #         end
         if wait_time < 0
           return "Check" 
         end
         return wait_time
       elsif people_eating.length <= people_waiting.length
          # If waiting & # wait line is greater than # of people_eating 
-         diff = people_waiting.length - people_eating.length + 1
-         wait_time = people_eating_time_remaining.inject(:+)
-         wait_time += diff * turnover
+         diff = people_waiting.length%people_eating.length
+         factor = (people_waiting.length/people_eating.length).to_i
+         #wait_time = people_eating_time_remaining.inject(:+)
+         wait_time = people_eating_time_remaining[diff-1]
+      
+         wait_time += (factor) * turnover
               if wait_time < 0
                 return "Check"
               end

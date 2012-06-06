@@ -10,6 +10,7 @@ class ApplicationController < ActionController::Base
   include AppointmentsHelper
   include PostsHelper
   include ApplicationHelper
+  include TableTypesHelper
   
   require 'twilio-ruby'
   

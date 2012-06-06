@@ -19,21 +19,52 @@
 	<div id="alerts_header"  style="overflow-y:scroll; height: 100px;">
 	</div>
 </div>
+<ul>
+<% @open_tables.each do |table| %>
+  <li><%= table %></li>
+<% end %>
+</ul>
+
+<div id="waiting_times">
+  <% @table_types.each do |table| %>
+    <% wait = estimated_wait_time(table.size) %>
+	  <% if wait == "Open" %>
+	    <% color = [0,100,0] #green %>
+	  <% elsif wait.to_i < 60 %>
+	    <% color = [255,255,0] #yellow %>
+	  <% else %>
+	    <% color = [255,0,0] #red %>
+	  <% end %>
+    <span class="well span2" style="background-color: rgba(<%= color[0] %>, <%= color[1] %>, <%= color[2] %>, 0.3)">
+      <strong><%= table.size %></strong>
+      <em class="pull-right">Wait: <%= wait %> m</em>
+    </span>
+  <% end %>  
+</div>
 
 <div class="tabbable">
   <ul class="nav nav-tabs">
     <li class="active"><a href="#tab1" data-toggle="tab">Waiting</a></li>
     <li><a href="#tab2" data-toggle="tab">Sitting</a></li>
+    <li><a href="#tab3" data-toggle="tab">Floor Plan</a></li>
   </ul>
   <div class="tab-content">
     <div class="tab-pane active" id="tab1">
 			<% if @appointments_sorted.count == 0 %>
-				<h3>No appointments for unseated guests right now. Phew. Nice work friend!</h3>
+			  <h3>No appointments for unseated guests right now. Phew. Nice work friend!</h3>
 			<% elsif @appointments_sorted.count == 1 %>
-				<ul class="well span4">
+			  <% wait = estimated_wait_time(@appointments_sorted.first.party) %>
+			  <% if wait == "Open" %>
+			    <% color = [0,100,0] #green %>
+			  <% elsif wait.to_i < 60 %>
+			    <% color = [255,255,0] #yellow %>
+			  <% else %>
+			    <% color = [255,0,0] #red %>
+			  <% end %>
+				<ul class="well span4" style="background-color: rgba(<%= color[0] %>, <%= color[1] %>, <%= color[2] %>, 0.3)">
 					<h3>Party: <%= @appointments_sorted.first.party %> 
 						<span class="pull-right">
-								Wait: <%= estimated_wait_time(@appointments_sorted.first.party) %>
+								Wait: <%= wait  %>
 						</span>
 					</h3>
 				<li>
@@ -131,6 +162,23 @@
 						<% end %>
 				</ol>
 			<% end %>
+    </div>
+    <div class="tab-pane" id="tab3">
+      <h3>Floor plan of restaurant</h3>
+			
+			<div style='border: 1px solid black; height: 500px; width: 500px;'>
+
+          <% ctr = 1 %>
+          <% @table_types.each do |table| %>
+            <% table.quantity.times do %>
+              <div class='table-layout' id='table-<%= ctr %>-<%= table.size %>' style="background: url('http://www.diabetesbluecircle.org/img/diabetesbluecircle.png');">
+                T #<%= ctr %> | <%= table.size %>
+              </div>
+              <% ctr += 1 %>
+            <% end %>
+          <% end %>
+        </div>
+				
     </div>
   </div>
 </div>
@@ -302,5 +350,31 @@
 		$('#alert_title').html('You have '+num_alerts+' alerts');
 		
 	});
+	
+	$(document).ready(function(){
+    
+    var els = $('.table-layout');
+    var positions = {
+      <% @table_types.each do |table| %>
+
+          <% table.position.each do |position| %>
+
+                  '<%= position[:id] %>' : {
+                    'top' : <%= position[:top] %>,
+                    'left' : <%= position[:left] %>,
+                    'size' : <%= table.size %>
+                  }
+
+            <% if position != table.position.last %>,<% end %>
+          <% end %>
+        <% if table != @table_types.last %>,<% end %>
+      <% end %>
+    };
+    
+    for(var i=0; i < els.length; i++){
+      //var id_info = els[i].id.split('-');
+      $('#'+els[i].id).css({ position: 'absolute', top: positions[i+1]['top']+300+'px', left: positions[i+1]['left']+'px' });
+    }
+  });
 
 </script>

@@ -12,7 +12,7 @@ class TableTypeController < ApplicationController
     end
     
     @table_type = TableType.new
-    @table_types = current_restaurant.layout.table_types
+    @table_types = current_restaurant.table_types
 
   end
   
@@ -27,6 +27,16 @@ class TableTypeController < ApplicationController
     @table_type.destroy
     
     redirect_to layout_url
+  end
+  
+  def layout_save
+    h = params[:el_positions]
+    table_types = current_restaurant.table_types
+    
+    update_layout_and_save(h, table_types)
+    
+    redirect_to layout_url
+    
   end
   
 end

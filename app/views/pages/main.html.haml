@@ -1,0 +1,19 @@
+.row-fluid
+  .span12.well
+    %h1 What would you like to see?
+    .row-fluid
+    .span5.well
+      = link_to "Today's queue", appointments_path
+      %p= current_restaurant.appointments.today_queue.count
+      = image_tag("http://msm.graphics.grocerywebsite.com/GraphicsShoppingList/ShoppingListIcon_221x221.png", style: 'max-width: 200px;')
+    .span5.well
+      = link_to "Your posts", posts_path 
+      %p= current_restaurant.posts.count
+      = image_tag("http://1.bp.blogspot.com/-DHmtgCq-Kz8/TbjqET68vTI/AAAAAAAAAGM/_ipIayHF5Kk/s1600/comment_stage_6.png", :style => 'max-width: 200px;')
+  .row-fluid
+    .span5.well
+      = link_to "Your stats", metrics_path
+      = image_tag("http://aux.iconpedia.net/uploads/1662330416.png", :style => 'max-width: 200px;')
+    .span5.well
+      = link_to "Your layout", layout_path
+      = image_tag("http://www.razorleaf.com/wp-content/uploads/2009/12/Blueprint-Icon-250x250.png", :style => 'max-width: 200px;')

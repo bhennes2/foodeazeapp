@@ -11,6 +11,7 @@ FoodEazeApp::Application.routes.draw do
   match '/metrics' => 'pages#metrics', :as => :metrics
   
   get '/layout' => 'TableType#index', :as => :layout
+  post '/layout-update' => 'TableType#layout_save', :as => :layout_update
   post '/layout' => 'TableType#create', :as => :table_types
   delete '/layout/:id' => 'TableType#destroy', :as => :table_type
   
